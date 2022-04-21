@@ -86,16 +86,18 @@ class App {
   }
 
   _newWorkout(e) {
-    e.preventDefault();
-
+    
+    
     const isInputAnNumber = inputs => {
       return inputs.every(input => Number.isFinite(input));
     };
-
+    
     const isInputAnPositiveNumber = inputs => {
       return inputs.every(input => input > 0);
     };
-
+    
+    e.preventDefault();
+    
     const type = inputType.value;
     const distance = +inputDistance.value;
     const duration = +inputDuration.value;
@@ -139,6 +141,8 @@ class App {
     this._hideForm();
 
     this._setLocalStorage();
+
+    e.preventDefault()
   }
 
   _renderWorkoutMarker(workout) {
@@ -234,16 +238,14 @@ class App {
     const data = JSON.parse(localStorage.getItem('workouts'));
     
 
-    if (!data) throw Error('There is no data.');
+    if (!data) return;
 
     this.#workouts = data;
 
     this.#workouts.forEach(singleWorkout => {
       this._renderWorkout(singleWorkout);
       
-    });
-
-    
+    })
   }
 
   reset() {
@@ -253,4 +255,3 @@ class App {
 }
 
 const app = new App();
-
