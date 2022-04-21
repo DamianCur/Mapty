@@ -1,8 +1,7 @@
 'use strict';
 
-import { Running } from "./Running.js";
-import { Cycling } from "./Cycling.js";
-
+import { Running } from './Running.js';
+import { Cycling } from './Cycling.js';
 
 const form = document.querySelector('.form');
 const containerWorkouts = document.querySelector('.workouts');
@@ -12,8 +11,6 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
-
-
 class App {
   #map;
   #mapEvent;
@@ -22,6 +19,7 @@ class App {
 
   constructor() {
     this._getPosition();
+    this._getLocalStorage();
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
@@ -52,6 +50,10 @@ class App {
     }).addTo(this.#map);
 
     this.#map.on('click', this._showForm.bind(this));
+
+    this.#workouts.forEach((singleWorkout) => {
+      this._renderWorkoutMarker(singleWorkout);
+    })
   }
 
   _showForm(mapE) {
@@ -132,9 +134,11 @@ class App {
     this.#workouts.push(workout);
     this._renderWorkoutMarker(workout);
 
+    this._renderWorkout(workout);
+
     this._hideForm();
 
-    this._renderWorkout(workout);
+    this._setLocalStorage();
   }
 
   _renderWorkoutMarker(workout) {
@@ -209,22 +213,42 @@ class App {
 
   _moveToPopup(e) {
     const workoutEl = e.target.closest('.workout');
-   
 
-    if(!workoutEl) throw Error("There is no workout element.")
+    if (!workoutEl) throw Error('There is no workout element.');
 
-    const workout = this.#workouts.find((el) => el.id === workoutEl.dataset.id)
-    
+    const workout = this.#workouts.find(el => el.id === workoutEl.dataset.id);
 
     this.#map.setView(workout.coords, this.#mapZoomLevel, {
       animate: true,
       pan: {
-        duration: 1
-      }
-    })
+        duration: 1,
+      },
+    });
+  }
 
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
 
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+    
 
+    if (!data) throw Error('There is no data.');
+
+    this.#workouts = data;
+
+    this.#workouts.forEach(singleWorkout => {
+      this._renderWorkout(singleWorkout);
+      
+    });
+
+    
+  }
+
+  reset() {
+    localStorage.removeItem("workouts")
+    location.reload()
   }
 }
 
